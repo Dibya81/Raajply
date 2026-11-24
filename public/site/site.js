@@ -468,3 +468,10 @@ $$('[data-reveal]').forEach((el) => io.observe(el));
 $('#yr').textContent = new Date().getFullYear();
 addEventListener('resize', () => { mq.w = $('#mqTrack').scrollWidth / 3; });
 requestAnimationFrame(frame);
+
+// Staff login pill: light follows the pointer
+(() => {
+  const b = document.querySelector('.staff-btn');
+  if (!b) return;
+  b.addEventListener('pointermove', (e) => { const r = b.getBoundingClientRect(); b.style.setProperty('--x', `${e.clientX - r.left}px`); b.style.setProperty('--y', `${e.clientY - r.top}px`); });
+})();

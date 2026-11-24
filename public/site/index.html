@@ -23,12 +23,23 @@
     </nav>
     <div class="hdr-act">
       <button class="snd" id="sndBtn" type="button" aria-pressed="false" aria-label="Turn sound on"><span class="bars"><i></i><i></i><i></i><i></i></span></button>
-      <a class="btn ghost hide-s" href="/app">Staff login</a>
+      <div class="staff" id="staff">
+        <a class="staff-btn" href="/app" aria-haspopup="true" aria-label="Staff login">
+          <span class="staff-ic"><svg class="lk" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path class="shackle" d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3"/></svg><svg class="ar" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+          <span class="staff-t">Staff login</span><span class="staff-dot" aria-hidden="true"></span>
+        </a>
+        <div class="staff-pop" role="menu" aria-label="Choose a desk">
+          <div class="sp-h"><span>Choose your desk</span><em>Demo · no password</em></div>
+          <a role="menuitem" href="/app?as=owner#/dashboard" style="--c:#d97706"><i>MD</i><span><b>Managing Director</b><small>Whole company view</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <a role="menuitem" href="/app?as=accounts#/dashboard" style="--c:#6366f1"><i>AC</i><span><b>Accounts</b><small>Sales, GST &amp; Tally</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <a role="menuitem" href="/app?as=production#/dashboard" style="--c:#10b981"><i>PR</i><span><b>Production</b><small>Logs to sheets</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+      </div>
       <a class="btn honey" href="#contact" data-magnetic>Become a distributor</a>
       <button class="burger" id="burger" type="button" aria-label="Open menu" aria-expanded="false"><span></span><span></span></button>
     </div>
   </div>
-  <div class="mnav" id="mnav"><a href="#process">Process</a><a href="#products">Products</a><a href="#story">Our story</a><a href="#responsible">Responsibility</a><a href="#contact">Contact</a><a href="/app">Staff login →</a></div>
+  <div class="mnav" id="mnav"><a href="#process">Process</a><a href="#products">Products</a><a href="#story">Our story</a><a href="#responsible">Responsibility</a><a href="#contact">Contact</a><a class="m-staff" href="/app">Staff login <span>→</span></a></div>
 </header>
 
 <main id="main">
