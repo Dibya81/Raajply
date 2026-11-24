@@ -478,70 +478,110 @@ requestAnimationFrame(frame);
 
 /* ------------------------------------------------------------------ */
 /* Our story — scroll deck: each year flies in from bottom-right and   */
-/* lands on the pile; older years shrink and lift behind it.           */
+/* lands on the pile. Motion is spring-smoothed; the top card leans    */
+/* with scroll speed, catches light under the pointer, and can be      */
+/* swiped/dragged away to move to the next (or previous) year.         */
 /* ------------------------------------------------------------------ */
 (function initDeck() {
   const sec = $('#story');
   if (!sec || !sec.classList.contains('deck')) return;
+  const track = $('#tlTrack');
   const cards = $$('.tl-card', sec);
   const N = cards.length;
   if (reduce) { sec.classList.add('deck-static'); return; }
   sec.style.setProperty('--n', N);
-  const yrEl = $('#deckYr'), nEl = $('#deckN'), bar = $('#deckBar');
-  $('#deckT').textContent = String(N).padStart(2, '0');
-  const years = cards.map((c) => c.querySelector('.yr')?.textContent || '');
-  const rest = cards.map((_, i) => (i % 2 ? 1 : -1) * (1.2 + (i * 7) % 3 * 0.6)); // natural pile tilt
-  const backOut = (t) => { const c1 = 1.45, c3 = c1 + 1; return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2); };
-  let active = -1, visible = false, raf = 0, tx = 0, ty = 0;
+  const rest = cards.map((_, i) => (i % 2 ? 1 : -1) * (0.8 + ((i * 7) % 3) * 0.5));
+  const backOut = (t) => { const c1 = 1.25, c3 = c1 + 1; return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2); };
+  const SPAN = (N - 1) * 1.04;
+  let visible = false, raf = 0, cur = -1, top = 0;
+  let pS = 0, lean = 0;                                  // smoothed progress and scroll-speed lean
+  let gx = 50, gy = 30, tx = 0, ty = 0;                  // glare + tilt from pointer
+  const drag = { on: false, id: null, x0: 0, y0: 0, dx: 0, dy: 0, back: 0 };
 
-  const progress = () => { const r = sec.getBoundingClientRect(); return clamp(-r.top / Math.max(1, r.height - innerHeight)); };
+  const target = () => { const r = sec.getBoundingClientRect(); return clamp(-r.top / Math.max(1, r.height - innerHeight)); };
+  function goTo(idx) {
+    idx = Math.max(0, Math.min(N - 1, idx));
+    const r = sec.getBoundingClientRect(); const topY = r.top + scrollY; const travel = sec.offsetHeight - innerHeight;
+    const y = topY + (idx / SPAN) * travel + 2;
+    if (typeof scrollToY === 'function') scrollToY(y); else scrollTo({ top: y, behavior: 'smooth' });
+  }
   function draw() {
     raf = 0;
-    const p = progress();
-    const f = p * (N - 1) * 1.04; // small hold at the end
+    const p = target();
+    const prev = pS;
+    pS += (p - pS) * 0.14;
+    if (Math.abs(p - pS) < 0.0004) pS = p;
+    lean += (clamp((pS - prev) * 900, -10, 10) - lean) * 0.2;
+    drag.back *= 0.82;                                   // spring back after an incomplete drag
+    const f = pS * SPAN;
     const vw = innerWidth, vh = innerHeight;
     let landed = 0;
-    cards.forEach((c, i) => { const ee = i === 0 ? 1 : clamp(f - (i - 1)); if (backOut(ee) > 0.85) landed = i; });
+    cards.forEach((c, i) => { if (backOut(i === 0 ? 1 : clamp(f - (i - 1))) > 0.85) landed = i; });
+    top = landed;
     cards.forEach((c, i) => {
-      const e = i === 0 ? 1 : clamp(f - (i - 1));         // entry 0→1
-      const d = clamp(f - i, 0, 5);                        // depth once newer cards land
+      const e = i === 0 ? 1 : clamp(f - (i - 1));
+      const d = clamp(f - i, 0, 5);
       const k = backOut(e);
-      const x = (1 - k) * vw * 0.78, y = (1 - k) * vh * 0.9;
-      const rot = lerp(18, rest[i], k) - d * 2.2;
-      const sc = lerp(0.8, 1, ease(e)) * (1 - d * 0.055);
-      const lift = -d * (vw < 640 ? 16 : 22);
       const isTop = i === landed;
-      const tilt = isTop ? `rotateX(${ty * -6}deg) rotateY(${tx * 8}deg)` : '';
-      c.style.transform = `translate(-50%, -50%) translate3d(${x}px, ${y + lift}px, 0) rotate(${rot}deg) scale(${sc}) ${tilt}`;
+      let x = (1 - k) * vw * 0.75, y = (1 - k) * vh * 0.85;
+      let rot = lerp(14, rest[i], k) - d * 1.6;
+      const sc = lerp(0.84, 1, ease(e)) * (1 - d * 0.05);
+      y += -d * (vw < 640 ? 14 : 20);
+      let extra = '';
+      if (isTop) {
+        const dx = drag.on ? drag.dx : drag.back;
+        x += dx; rot += dx * 0.04;
+        extra = `rotateX(${(-ty * 5 + lean).toFixed(2)}deg) rotateY(${(tx * 7).toFixed(2)}deg)`;
+        c.style.setProperty('--gx', `${gx}%`); c.style.setProperty('--gy', `${gy}%`);
+      }
+      c.style.transform = `translate(-50%, -50%) translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0) rotate(${rot.toFixed(2)}deg) scale(${sc.toFixed(4)}) ${extra}`;
       c.style.opacity = String(e <= 0 ? 0 : d > 3.2 ? clamp(4.2 - d) : 1);
       c.style.zIndex = String(i + 1);
-      c.style.filter = d > 0 ? `brightness(${1 - Math.min(d, 3) * 0.14}) saturate(${1 - Math.min(d, 3) * 0.15})` : '';
-      c.style.setProperty('--img', String(lerp(1.3, 1, ease(e))));
-      c.style.setProperty('--shine', `${lerp(-60, 160, clamp((e - 0.55) / 0.45))}%`);
+      c.style.filter = d > 0.02 ? `brightness(${(1 - Math.min(d, 3) * 0.13).toFixed(3)})` : '';
+      c.style.setProperty('--img', (lerp(1.25, 1, ease(e)) + (isTop ? lean * -0.004 : 0)).toFixed(4));
+      c.style.setProperty('--shine', `${lerp(-60, 160, clamp((e - 0.55) / 0.45)).toFixed(1)}%`);
       c.classList.toggle('top', isTop);
     });
-    const a = landed;
-    if (a !== active) {
-      active = a;
-      nEl.textContent = String(a + 1).padStart(2, '0');
-      yrEl.classList.remove('in'); void yrEl.offsetWidth; yrEl.textContent = years[a]; yrEl.classList.add('in');
-      sec.style.setProperty('--hue', String(a / Math.max(1, N - 1)));
-      if (p > 0 && p < 1) sfx('tap', false, SOUND_DEFAULT);
-    }
-    bar.style.transform = `scaleX(${p})`;
-    yrEl.style.transform = `translate(-50%, calc(-50% + ${(p - 0.5) * -60}px))`;
-    if (visible) raf = requestAnimationFrame(draw);
+    if (landed !== cur) { if (cur !== -1 && p > 0 && p < 1) sfx('tap', false, SOUND_DEFAULT); cur = landed; }
+    const moving = Math.abs(p - pS) > 0.0004 || Math.abs(lean) > 0.02 || Math.abs(drag.back) > 0.5 || drag.on;
+    if (visible || moving) raf = requestAnimationFrame(draw);
   }
-  new IntersectionObserver(([en]) => { visible = en.isIntersecting; if (visible && !raf) raf = requestAnimationFrame(draw); }, { rootMargin: '200px 0px' }).observe(sec);
-  // Tilt the top card toward the pointer / finger
-  sec.addEventListener('pointermove', (e) => { tx = (e.clientX / innerWidth) * 2 - 1; ty = (e.clientY / innerHeight) * 2 - 1; }, { passive: true });
-  sec.addEventListener('pointerleave', () => { tx = 0; ty = 0; });
-  // Tap the deck to jump to the next year
-  $('#tlTrack').addEventListener('click', () => {
-    const r = sec.getBoundingClientRect(); const top = r.top + scrollY; const travel = sec.offsetHeight - innerHeight;
-    const next = Math.min(N - 1, active + 1);
-    const y = top + (next / ((N - 1) * 1.04)) * travel + 2;
-    if (typeof scrollToY === 'function') scrollToY(y); else scrollTo({ top: y, behavior: 'smooth' });
+  const kick = () => { if (!raf) raf = requestAnimationFrame(draw); };
+  new IntersectionObserver(([en]) => { visible = en.isIntersecting; if (visible) kick(); }, { rootMargin: '200px 0px' }).observe(sec);
+  addEventListener('scroll', kick, { passive: true });
+
+  // Light + tilt follow the pointer over the top card
+  sec.addEventListener('pointermove', (e) => {
+    tx = (e.clientX / innerWidth) * 2 - 1; ty = (e.clientY / innerHeight) * 2 - 1;
+    const r = cards[top].getBoundingClientRect();
+    gx = clamp((e.clientX - r.left) / r.width, 0, 1) * 100; gy = clamp((e.clientY - r.top) / r.height, 0, 1) * 100;
+    if (drag.on && e.pointerId === drag.id) { drag.dx = e.clientX - drag.x0; drag.dy = e.clientY - drag.y0; }
+    kick();
+  }, { passive: true });
+  sec.addEventListener('pointerleave', () => { tx = 0; ty = 0; kick(); });
+
+  // Swipe / drag the top card sideways: left = next year, right = previous year
+  track.addEventListener('pointerdown', (e) => {
+    if (!e.target.closest('.tl-card.top')) return;
+    drag.on = true; drag.id = e.pointerId; drag.x0 = e.clientX; drag.y0 = e.clientY; drag.dx = 0; drag.dy = 0;
+    track.setPointerCapture?.(e.pointerId); sec.classList.add('dragging'); kick();
+  });
+  const end = (e) => {
+    if (!drag.on || (e && e.pointerId !== drag.id)) return;
+    drag.on = false; sec.classList.remove('dragging');
+    const dx = drag.dx, moved = Math.abs(dx) > 8 || Math.abs(drag.dy) > 8;
+    if (dx < -70) { sfx('whoosh', false, SOUND_DEFAULT); goTo(top + 1); drag.back = dx * 0.4; }
+    else if (dx > 70) { sfx('whoosh', false, SOUND_DEFAULT); goTo(top - 1); drag.back = dx * 0.4; }
+    else { drag.back = dx; if (!moved) goTo(top + 1); }     // a plain tap also moves on
+    kick();
+  };
+  track.addEventListener('pointerup', end);
+  track.addEventListener('pointercancel', end);
+  // Keyboard: arrows move through the years when the section is on screen
+  addEventListener('keydown', (e) => {
+    if (!visible || /input|textarea|select/i.test(document.activeElement?.tagName || '')) return;
+    const r = sec.getBoundingClientRect(); if (r.top > 0 || r.bottom < innerHeight) return;
+    if (e.key === 'ArrowRight') { e.preventDefault(); goTo(top + 1); } else if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(top - 1); }
   });
   draw();
 })();

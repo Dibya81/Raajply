@@ -612,9 +612,13 @@ body.intro .hdr { opacity: 0; transform: translateY(-20px); pointer-events: none
 @keyframes yrIn { from { opacity: 0; filter: blur(14px); letter-spacing: .06em; } }
 .deck-glow { position: absolute; inset: -20%; z-index: 0; pointer-events: none; background: radial-gradient(40% 35% at calc(30% + var(--hue, 0) * 40%) 60%, rgba(240, 196, 108, .16), transparent 70%), radial-gradient(35% 30% at calc(75% - var(--hue, 0) * 40%) 30%, rgba(120, 170, 120, .12), transparent 70%); transition: background .6s; animation: glowDrift 14s ease-in-out infinite alternate; }
 @keyframes glowDrift { to { transform: translate3d(3%, -2%, 0) scale(1.05); } }
-.timeline.deck .tl-track { position: relative !important; display: block !important; flex: 1; width: 100% !important; margin: 0 !important; padding: 0 !important; overflow: visible !important; transform: none !important; z-index: 2; perspective: 1200px; cursor: pointer; }
+.timeline.deck .tl-track { touch-action: pan-y; user-select: none; -webkit-user-select: none; position: relative !important; display: block !important; flex: 1; width: 100% !important; margin: 0 !important; padding: 0 !important; overflow: visible !important; transform: none !important; z-index: 2; perspective: 1200px; cursor: grab; }
+.timeline.deck.dragging .tl-track { cursor: grabbing; }
+.timeline.deck .tl-card img { -webkit-user-drag: none; pointer-events: none; }
 .timeline.deck .tl-card { position: absolute !important; left: 50%; top: 50%; width: min(84vw, 400px) !important; min-height: 0; margin: 0; padding: 0 0 22px !important; border-radius: 26px; background: linear-gradient(165deg, #242c24, #141a15); border: 1px solid rgba(240, 196, 108, .2); box-shadow: 0 40px 80px -30px rgba(0, 0, 0, .75), inset 0 1px 0 rgba(255, 255, 255, .08); will-change: transform, opacity; transform-origin: 50% 60%; transition: border-color .4s, box-shadow .4s; flex: none !important; opacity: 0; }
 .timeline.deck .tl-card.top { border-color: rgba(240, 196, 108, .55); box-shadow: 0 50px 100px -30px rgba(0, 0, 0, .8), 0 0 0 1px rgba(240, 196, 108, .15), 0 0 60px -10px rgba(240, 196, 108, .35); }
+.timeline.deck .tl-card::before { content: ""; position: absolute; inset: 0; z-index: 2; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .4s; background: radial-gradient(420px circle at var(--gx, 50%) var(--gy, 30%), rgba(255, 238, 205, .16), transparent 45%); }
+.timeline.deck .tl-card.top::before { opacity: 1; }
 .timeline.deck .tl-card::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: linear-gradient(105deg, transparent calc(var(--shine, -60%) - 18%), rgba(255, 240, 210, .22) var(--shine, -60%), transparent calc(var(--shine, -60%) + 18%)); }
 .timeline.deck .tl-card:hover { transform: none; }
 .timeline.deck .tl-img { margin: 0 0 18px !important; aspect-ratio: 16 / 10; border-radius: 26px 26px 0 0; display: block !important; }

@@ -770,10 +770,14 @@ body.lock { overflow: hidden; }
 table.t th.num { text-align: right; }
 @media (min-width: 961px) { .sr-switch { width: 30px; padding: 0; justify-content: center; } .sr-switch span { display: none; } }
 
-/* Sidebar must always reach its footer (sounds / bigger text / sign out), even on short screens */
-.sidebar { overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
-.sidebar .nav { flex: 1 0 auto; overflow: visible; }
-.sb-foot { flex: none; }
+/* Sidebar: header and footer stay put, only the menu list scrolls — sign out is always visible */
+.sidebar { overflow: hidden; }
+.sidebar > * { flex-shrink: 0; }
+.sidebar .nav { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: rgba(24, 24, 27, .18) transparent; margin: 0 -6px; padding: 2px 6px 12px; -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 10px, #000 calc(100% - 18px), transparent); mask-image: linear-gradient(180deg, transparent 0, #000 10px, #000 calc(100% - 18px), transparent); }
+.sidebar .nav::-webkit-scrollbar { width: 6px; } .sidebar .nav::-webkit-scrollbar-thumb { background: rgba(24, 24, 27, .16); border-radius: 6px; }
+.sb-foot { flex: none; background: inherit; }
+/* very short windows: let the whole sidebar scroll instead */
+@media (max-height: 480px) { .sidebar { overflow-y: auto; } .sidebar .nav { flex: none; overflow: visible; -webkit-mask-image: none; mask-image: none; } }
 html.big .modal { max-height: calc((100vh - 40px) / 1.12); }
 @media (max-width: 960px) {
   html.big .modal, html.big .help, html.big .cmdk, html.big .sheet { zoom: 1; }
