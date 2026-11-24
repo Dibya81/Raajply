@@ -515,7 +515,8 @@ a.rank-row:hover .rn { color: var(--brand); }
 .sw-pill[data-on="true"] { background: var(--brand); } .sw-pill[data-on="true"]::after { transform: translateX(12px); }
 
 /* Bigger text option */
-html.big .app, html.big .modal-bg, html.big .help-bg, html.big .cmdk-bg { zoom: 1.12; }
+html.big .content, html.big .modal, html.big .help, html.big .cmdk, html.big .sheet { zoom: 1.12; }
+html.big .nav a, html.big .sf-btn { font-size: 15px; }
 
 @media (max-width: 1200px) { .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 560px) { .tiles { grid-template-columns: 1fr; } .help-btn span { display: none; } .help-btn { padding: 0; width: 34px; justify-content: center; } }
@@ -768,3 +769,13 @@ body.lock { overflow: hidden; }
 
 table.t th.num { text-align: right; }
 @media (min-width: 961px) { .sr-switch { width: 30px; padding: 0; justify-content: center; } .sr-switch span { display: none; } }
+
+/* Sidebar must always reach its footer (sounds / bigger text / sign out), even on short screens */
+.sidebar { overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+.sidebar .nav { flex: 1 0 auto; overflow: visible; }
+.sb-foot { flex: none; }
+html.big .modal { max-height: calc((100vh - 40px) / 1.12); }
+@media (max-width: 960px) {
+  html.big .modal, html.big .help, html.big .cmdk, html.big .sheet { zoom: 1; }
+  html.big .modal-b, html.big .sheet-b, html.big .help-b { font-size: 15.5px; }
+}

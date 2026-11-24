@@ -81,6 +81,20 @@ const SOUNDS = {
   whoosh: (c) => noise(c, { d: 0.35, v: 0.02, from: 300, to: 2600 }),
   notify: (c) => { tone(c, { f: 1046.5, d: 0.12, v: 0.04 }); tone(c, { f: 1568, t: 0.1, d: 0.25, v: 0.035 }); },
   coin: (c) => { tone(c, { f: 1318.5, d: 0.08, v: 0.04, type: 'square' }); tone(c, { f: 1975.5, t: 0.07, d: 0.25, v: 0.03, type: 'square' }); },
+  woodCrack: (c) => {
+    // dry splintering: sharp high snaps over a low creak
+    [0, 0.05, 0.085, 0.14, 0.2, 0.24, 0.31].forEach((t, i) => noise(c, { t, d: 0.018 + (i % 3) * 0.008, v: 0.09 - i * 0.006, from: 4200 - i * 300, to: 1800, q: 3.5 }));
+    tone(c, { f: 140, f2: 70, d: 0.42, type: 'sawtooth', v: 0.018, attack: 0.02 });
+    knock(c, { t: 0.02, f: 210, v: 0.07 });
+  },
+  shatter: (c) => {
+    // the panel bursts: a low boom, a rush of air, then wooden pieces clattering away
+    tone(c, { f: 90, f2: 38, d: 0.55, type: 'sine', v: 0.14, attack: 0.004 });
+    noise(c, { d: 0.7, v: 0.06, from: 3200, to: 260, q: 0.6 });
+    noise(c, { t: 0.02, d: 0.09, v: 0.1, from: 5000, to: 2000, q: 2 });
+    [0.06, 0.11, 0.15, 0.2, 0.26, 0.33, 0.41, 0.5, 0.6].forEach((t, i) => knock(c, { t, f: 260 + ((i * 97) % 380), v: 0.045 - i * 0.003 }));
+    [1046.5, 1318.5, 1568, 2093].forEach((f, i) => tone(c, { f, t: 0.18 + i * 0.06, d: 0.5, v: 0.014 }));
+  },
   refresh: (c) => { [0, 0.06, 0.12].forEach((t, i) => tone(c, { f: 900 + i * 220, t, d: 0.06, type: 'triangle', v: 0.022 })); },
 };
 

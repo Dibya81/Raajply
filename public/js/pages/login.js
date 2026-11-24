@@ -3,6 +3,7 @@ import { api } from '../api.js';
 import { html, raw, ic, toast } from '../ui.js';
 import { startSession, rerender } from '../app.js';
 import { sfx, soundOn, setSound } from '../sound.js';
+import { woodSplit } from '../woodsplit.js';
 
 const ROLES = [
   { role: 'owner', tone: 'md', icon: 'sparkle', title: 'Managing Director', sub: 'Whole company view', turn: -16 },
@@ -133,18 +134,18 @@ export async function render(root) {
     try {
       const [r] = await Promise.all([
         api('/api/auth/demo-login', { method: 'POST', body: { role: b.dataset.role } }),
-        new Promise((ok) => setTimeout(ok, 450)),
+        new Promise((ok) => setTimeout(ok, 320)),
       ]);
       lg.dataset.state = 'press';
-      await new Promise((ok) => setTimeout(ok, 650));
-      await startSession(r.token);
-      sfx('login');
-      lg.classList.add('leaving');
-      await new Promise((ok) => setTimeout(ok, 320));
+      const br = b.getBoundingClientRect();
+      const split = woodSplit({ x: br.left + br.width / 2, y: br.top + br.height / 2 });
+      await Promise.all([split.covered, startSession(r.token)]);
       cleanup();
-      toast(`Welcome, ${r.user.name} — you're in as ${r.user.roleName}`);
       location.hash = '#/dashboard';
-      rerender();
+      await rerender();                 // the dashboard is drawn underneath the wooden panel
+      sfx('login');
+      await split.burst();              // …and the panel shatters to reveal it
+      toast(`Welcome, ${r.user.name} — you're in as ${r.user.roleName}`);
     } catch (ex) {
       busy = false;
       b.classList.remove('loading'); roles.classList.remove('busy');
