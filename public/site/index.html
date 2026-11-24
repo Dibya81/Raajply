@@ -147,13 +147,14 @@
 </section>
 
 <!-- ============ TIMELINE (horizontal on scroll) ============ -->
-<section class="timeline" id="story" data-pin="timeline" aria-labelledby="tl-h">
+<section class="timeline deck" id="story" data-pin="timeline" aria-labelledby="tl-h">
   <div class="pin-stage">
     <div class="wrap tl-head">
       <p class="kicker light">Our story</p>
       <h2 class="display md light" id="tl-h">One lathe in 1998. <em>Still pressing.</em></h2>
-      <p class="swipe-hint" aria-hidden="true">Swipe <span>→</span></p>
     </div>
+    <div class="deck-yr" id="deckYr" aria-hidden="true">1998</div>
+    <div class="deck-glow" aria-hidden="true"></div>
     <div class="tl-track" id="tlTrack">
       <article class="tl-card"><div class="tl-img"><img src="/img/photos/1430490082716-7e34f7947c6c-900.jpg" alt="" loading="lazy" decoding="async"></div><span class="yr">1998</span><h3>The first lathe</h3><p>One lathe, one promise: honest measure.</p></article>
       <article class="tl-card"><div class="tl-img"><img src="/img/photos/1704742950992-9815a104820c-900.jpg" alt="" loading="lazy" decoding="async"></div><span class="yr">2003</span><h3>Hot press</h3><p>MR plywood — still our best seller.</p></article>
@@ -163,7 +164,7 @@
       <article class="tl-card"><div class="tl-img"><img src="/img/photos/1701191644740-75d387ec1866-900.jpg" alt="" loading="lazy" decoding="async"></div><span class="yr">2020</span><h3>Teak decorative</h3><p>Faces from Karnataka farm teak.</p></article>
       <article class="tl-card hl"><div class="tl-img"><img src="/img/photos/1749572855201-feb5cf658479-900.jpg" alt="" loading="lazy" decoding="async"></div><span class="yr">2026</span><h3>Fully digital</h3><p>Log to invoice on one system.</p></article>
     </div>
-    <div class="wrap tl-progress"><span id="tlBar"></span></div>
+    <div class="wrap deck-foot" aria-hidden="true"><span class="deck-n"><b id="deckN">01</b> / <span id="deckT">07</span></span><span class="deck-bar"><i id="deckBar"></i></span><span class="deck-hint">Scroll <em>↓</em></span></div>
   </div>
 </section>
 

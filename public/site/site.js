@@ -401,7 +401,7 @@ function frame(t) {
     }
     // timeline: vertical scroll → horizontal track
     const tl = $('#story');
-    if (tl && desktop()) {
+    if (tl && desktop() && !tl.classList.contains('deck')) {
       const p = pinProgress(tl); const track = $('#tlTrack');
       const max = track.scrollWidth - innerWidth;
       track.style.transform = `translate3d(${-max * ease(p)}px,0,0)`;
@@ -474,4 +474,74 @@ requestAnimationFrame(frame);
   const b = document.querySelector('.staff-btn');
   if (!b) return;
   b.addEventListener('pointermove', (e) => { const r = b.getBoundingClientRect(); b.style.setProperty('--x', `${e.clientX - r.left}px`); b.style.setProperty('--y', `${e.clientY - r.top}px`); });
+})();
+
+/* ------------------------------------------------------------------ */
+/* Our story — scroll deck: each year flies in from bottom-right and   */
+/* lands on the pile; older years shrink and lift behind it.           */
+/* ------------------------------------------------------------------ */
+(function initDeck() {
+  const sec = $('#story');
+  if (!sec || !sec.classList.contains('deck')) return;
+  const cards = $$('.tl-card', sec);
+  const N = cards.length;
+  if (reduce) { sec.classList.add('deck-static'); return; }
+  sec.style.setProperty('--n', N);
+  const yrEl = $('#deckYr'), nEl = $('#deckN'), bar = $('#deckBar');
+  $('#deckT').textContent = String(N).padStart(2, '0');
+  const years = cards.map((c) => c.querySelector('.yr')?.textContent || '');
+  const rest = cards.map((_, i) => (i % 2 ? 1 : -1) * (1.2 + (i * 7) % 3 * 0.6)); // natural pile tilt
+  const backOut = (t) => { const c1 = 1.45, c3 = c1 + 1; return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2); };
+  let active = -1, visible = false, raf = 0, tx = 0, ty = 0;
+
+  const progress = () => { const r = sec.getBoundingClientRect(); return clamp(-r.top / Math.max(1, r.height - innerHeight)); };
+  function draw() {
+    raf = 0;
+    const p = progress();
+    const f = p * (N - 1) * 1.04; // small hold at the end
+    const vw = innerWidth, vh = innerHeight;
+    let landed = 0;
+    cards.forEach((c, i) => { const ee = i === 0 ? 1 : clamp(f - (i - 1)); if (backOut(ee) > 0.85) landed = i; });
+    cards.forEach((c, i) => {
+      const e = i === 0 ? 1 : clamp(f - (i - 1));         // entry 0→1
+      const d = clamp(f - i, 0, 5);                        // depth once newer cards land
+      const k = backOut(e);
+      const x = (1 - k) * vw * 0.78, y = (1 - k) * vh * 0.9;
+      const rot = lerp(18, rest[i], k) - d * 2.2;
+      const sc = lerp(0.8, 1, ease(e)) * (1 - d * 0.055);
+      const lift = -d * (vw < 640 ? 16 : 22);
+      const isTop = i === landed;
+      const tilt = isTop ? `rotateX(${ty * -6}deg) rotateY(${tx * 8}deg)` : '';
+      c.style.transform = `translate(-50%, -50%) translate3d(${x}px, ${y + lift}px, 0) rotate(${rot}deg) scale(${sc}) ${tilt}`;
+      c.style.opacity = String(e <= 0 ? 0 : d > 3.2 ? clamp(4.2 - d) : 1);
+      c.style.zIndex = String(i + 1);
+      c.style.filter = d > 0 ? `brightness(${1 - Math.min(d, 3) * 0.14}) saturate(${1 - Math.min(d, 3) * 0.15})` : '';
+      c.style.setProperty('--img', String(lerp(1.3, 1, ease(e))));
+      c.style.setProperty('--shine', `${lerp(-60, 160, clamp((e - 0.55) / 0.45))}%`);
+      c.classList.toggle('top', isTop);
+    });
+    const a = landed;
+    if (a !== active) {
+      active = a;
+      nEl.textContent = String(a + 1).padStart(2, '0');
+      yrEl.classList.remove('in'); void yrEl.offsetWidth; yrEl.textContent = years[a]; yrEl.classList.add('in');
+      sec.style.setProperty('--hue', String(a / Math.max(1, N - 1)));
+      if (p > 0 && p < 1) sfx('tap', false, SOUND_DEFAULT);
+    }
+    bar.style.transform = `scaleX(${p})`;
+    yrEl.style.transform = `translate(-50%, calc(-50% + ${(p - 0.5) * -60}px))`;
+    if (visible) raf = requestAnimationFrame(draw);
+  }
+  new IntersectionObserver(([en]) => { visible = en.isIntersecting; if (visible && !raf) raf = requestAnimationFrame(draw); }, { rootMargin: '200px 0px' }).observe(sec);
+  // Tilt the top card toward the pointer / finger
+  sec.addEventListener('pointermove', (e) => { tx = (e.clientX / innerWidth) * 2 - 1; ty = (e.clientY / innerHeight) * 2 - 1; }, { passive: true });
+  sec.addEventListener('pointerleave', () => { tx = 0; ty = 0; });
+  // Tap the deck to jump to the next year
+  $('#tlTrack').addEventListener('click', () => {
+    const r = sec.getBoundingClientRect(); const top = r.top + scrollY; const travel = sec.offsetHeight - innerHeight;
+    const next = Math.min(N - 1, active + 1);
+    const y = top + (next / ((N - 1) * 1.04)) * travel + 2;
+    if (typeof scrollToY === 'function') scrollToY(y); else scrollTo({ top: y, behavior: 'smooth' });
+  });
+  draw();
 })();

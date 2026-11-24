@@ -601,3 +601,51 @@ body.intro .hdr { opacity: 0; transform: translateY(-20px); pointer-events: none
 }
 @media (hover: none) { .staff-pop { display: none; } }
 @media (prefers-reduced-motion: reduce) { .staff-btn::before, .staff-dot { animation: none; } }
+
+/* ---------- Our story: scroll deck (phone + desktop) ---------- */
+.timeline.deck { height: calc((var(--n, 7) - 1) * 62svh + 100svh) !important; background: var(--ink); }
+.timeline.deck .pin-stage { position: sticky !important; top: 0; height: 100svh !important; padding: 0 !important; display: flex; flex-direction: column; justify-content: flex-start; overflow: hidden; isolation: isolate; }
+.timeline.deck .tl-head { position: relative; z-index: 3; padding-top: 96px; margin: 0 auto; }
+.timeline.deck .tl-head .display { max-width: 16ch; }
+.deck-yr { position: absolute; left: 50%; top: 56%; transform: translate(-50%, -50%); z-index: 0; font-family: var(--serif); font-size: clamp(150px, 34vw, 420px); line-height: .8; letter-spacing: -0.04em; color: transparent; -webkit-text-stroke: 1.5px rgba(240, 196, 108, .22); background: linear-gradient(180deg, rgba(240, 196, 108, .16), rgba(240, 196, 108, 0)); -webkit-background-clip: text; background-clip: text; pointer-events: none; white-space: nowrap; will-change: transform; }
+.deck-yr.in { animation: yrIn .9s var(--ease) both; }
+@keyframes yrIn { from { opacity: 0; filter: blur(14px); letter-spacing: .06em; } }
+.deck-glow { position: absolute; inset: -20%; z-index: 0; pointer-events: none; background: radial-gradient(40% 35% at calc(30% + var(--hue, 0) * 40%) 60%, rgba(240, 196, 108, .16), transparent 70%), radial-gradient(35% 30% at calc(75% - var(--hue, 0) * 40%) 30%, rgba(120, 170, 120, .12), transparent 70%); transition: background .6s; animation: glowDrift 14s ease-in-out infinite alternate; }
+@keyframes glowDrift { to { transform: translate3d(3%, -2%, 0) scale(1.05); } }
+.timeline.deck .tl-track { position: relative !important; display: block !important; flex: 1; width: 100% !important; margin: 0 !important; padding: 0 !important; overflow: visible !important; transform: none !important; z-index: 2; perspective: 1200px; cursor: pointer; }
+.timeline.deck .tl-card { position: absolute !important; left: 50%; top: 50%; width: min(84vw, 400px) !important; min-height: 0; margin: 0; padding: 0 0 22px !important; border-radius: 26px; background: linear-gradient(165deg, #242c24, #141a15); border: 1px solid rgba(240, 196, 108, .2); box-shadow: 0 40px 80px -30px rgba(0, 0, 0, .75), inset 0 1px 0 rgba(255, 255, 255, .08); will-change: transform, opacity; transform-origin: 50% 60%; transition: border-color .4s, box-shadow .4s; flex: none !important; opacity: 0; }
+.timeline.deck .tl-card.top { border-color: rgba(240, 196, 108, .55); box-shadow: 0 50px 100px -30px rgba(0, 0, 0, .8), 0 0 0 1px rgba(240, 196, 108, .15), 0 0 60px -10px rgba(240, 196, 108, .35); }
+.timeline.deck .tl-card::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: linear-gradient(105deg, transparent calc(var(--shine, -60%) - 18%), rgba(255, 240, 210, .22) var(--shine, -60%), transparent calc(var(--shine, -60%) + 18%)); }
+.timeline.deck .tl-card:hover { transform: none; }
+.timeline.deck .tl-img { margin: 0 0 18px !important; aspect-ratio: 16 / 10; border-radius: 26px 26px 0 0; display: block !important; }
+.timeline.deck .tl-img img { transform: scale(var(--img, 1)); transition: none; filter: saturate(.95); }
+.timeline.deck .tl-card .yr { display: block; padding: 0 22px; font-size: clamp(44px, 12vw, 64px); }
+.timeline.deck .tl-card h3 { padding: 6px 22px 0 !important; margin: 0 0 6px; font-size: clamp(22px, 6vw, 30px) !important; }
+.timeline.deck .tl-card p { padding: 0 22px; font-size: 14.5px !important; }
+.timeline.deck .tl-card.hl { background: linear-gradient(165deg, #5c461e, #1e1c12); }
+.deck-foot { position: relative; z-index: 3; display: flex; align-items: center; gap: 16px; padding: 0 0 calc(22px + env(safe-area-inset-bottom, 0px)); color: var(--cream-2); font-size: 13px; }
+.deck-n { font-variant-numeric: tabular-nums; letter-spacing: .04em; } .deck-n b { font-family: var(--serif); font-weight: 400; font-size: 26px; color: var(--honey-2); }
+.deck-bar { flex: 1; height: 2px; border-radius: 2px; background: var(--line-d); overflow: hidden; }
+.deck-bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--honey-3, #b8862b), var(--honey-2)); transform-origin: left; transform: scaleX(0); }
+.deck-hint em { display: inline-block; font-style: normal; color: var(--honey-2); animation: hintBob 1.6s ease-in-out infinite; }
+@keyframes hintBob { 50% { transform: translateY(4px); } }
+@media (min-width: 900px) {
+  .timeline.deck .tl-head { position: absolute; left: max(24px, calc((100vw - 1240px) / 2)); top: 50%; transform: translateY(-50%); width: 34%; padding: 0; }
+  .timeline.deck .tl-track { margin-left: 22% !important; width: 78% !important; }
+  .timeline.deck .tl-card { width: 420px !important; }
+  .deck-yr { left: 62%; }
+  .deck-foot { position: absolute; left: 0; right: 0; bottom: 0; margin: 0 auto; }
+}
+@media (max-width: 640px) {
+  .timeline.deck .tl-head { padding-top: 84px; }
+  .timeline.deck .tl-head .kicker { margin-bottom: 6px; }
+  .deck-yr { top: 86%; font-size: 40vw; }
+  .timeline.deck .tl-track { margin-top: -4svh !important; }
+}
+@media (max-height: 700px) and (max-width: 640px) { .timeline.deck .tl-img { aspect-ratio: 16 / 8; } .timeline.deck .tl-card p { display: none; } }
+/* reduced motion: a simple vertical list */
+.timeline.deck.deck-static { height: auto !important; }
+.timeline.deck.deck-static .pin-stage { position: relative !important; height: auto !important; padding: 90px 0 60px !important; }
+.timeline.deck.deck-static .tl-track { display: grid !important; gap: 18px; justify-items: center; padding: 30px 18px 0 !important; }
+.timeline.deck.deck-static .tl-card { position: relative !important; left: auto; top: auto; opacity: 1; transform: none !important; }
+.timeline.deck.deck-static .deck-yr, .timeline.deck.deck-static .deck-foot { display: none; }
