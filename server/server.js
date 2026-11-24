@@ -75,7 +75,7 @@ function serveStatic(req, res, pathname) {
   let rel = decodeURIComponent(pathname);
   // "/" is the company website; the software lives at /app (any other page path also opens the app).
   if (rel === '/') rel = '/site/index.html';
-  else if (!path.extname(rel)) rel = '/index.html';
+  else if (!path.extname(rel)) rel = '/app/index.html';
   const file = path.normalize(path.join(PUBLIC, rel));
   if (!file.startsWith(PUBLIC + path.sep)) return send(req, res, 403, { error: 'Forbidden' });
   fs.readFile(file, (err, buf) => {
