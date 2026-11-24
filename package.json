@@ -1,0 +1,14 @@
+{
+  "name": "raajply-erp",
+  "version": "0.1.0",
+  "description": "Inventory, production, sales and finance system for a wood manufacturing company — prototype with demo data. Zero dependencies.",
+  "private": true,
+  "main": "server/server.js",
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "start": "node server/server.js",
+    "seed": "node server/seed.js",
+    "test": "node --test tests/cft.test.js tests/api.test.js"
+  },
+  "license": "UNLICENSED"
+}
